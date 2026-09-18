@@ -9,7 +9,6 @@ import QtQuick.Layouts
 Item {
     id: clockIsland
 
-    // Желаемые размеры. Реальные размеры задаются внутри Rectangle.
     implicitWidth: 96
     implicitHeight: 32
 
@@ -51,18 +50,16 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
 
-
-        // Размеры зависят от состояния.
         width: clockIsland.mode === "clock" ? 96 : 240
         height: 32
 
         radius: height / 3
         color: "#000000"
 
-        // Плавная анимация ширины.
+        // Плавное изменение ширины при смене режима.
         Behavior on width {
             NumberAnimation {
-                duration: 250
+                duration: 300
                 easing.type: Easing.OutCubic
             }
         }
@@ -70,36 +67,44 @@ Item {
         // === ЧАСЫ ===
         Text {
             id: timeText
-            visible: clockIsland.mode === "clock"
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
 
             horizontalAlignment: Text.AlignHCenter
 
-            // Qt.formatDateTime — удобный способ форматирования даты.
-            // systemClock.date — текущее время.
             text: Qt.formatDateTime(systemClock.date, "HH:mm")
 
             color: "white"
             font.pixelSize: 16
+
+            // Плавное исчезновение/появление часов.
+            opacity: clockIsland.mode === "clock" ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
         }
 
         // === СТРОКА Звук ===
         RowLayout {
             id: volumeContent
-            visible: clockIsland.mode === "volume"
+
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.leftMargin: 20
             anchors.rightMargin: 20
             anchors.verticalCenter: parent.verticalCenter
 
-            // Видимость зависит от состояния.
-            opacity: visible ? 1 : 0
+            spacing: 12
 
+            // Плавное появление/исчезновение контента громкости.
+            opacity: clockIsland.mode === "volume" ? 1 : 0
             Behavior on opacity {
                 NumberAnimation {
-                    duration: 150
+                    duration: 200
+                    easing.type: Easing.OutCubic
                 }
             }
 
@@ -131,11 +136,14 @@ Item {
                     radius: height / 2
                     color: "white"
 
-                    // Ширина заливки зависит от громкости.
                     width: parent.width * (Pipewire.defaultAudioSink?.audio?.volume ?? 0)
 
+                    // Плавное изменение заливки.
                     Behavior on width {
-                        NumberAnimation { duration: 100 }
+                        NumberAnimation {
+                            duration: 150
+                            easing.type: Easing.OutCubic
+                        }
                     }
                 }
             }

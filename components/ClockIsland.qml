@@ -3,6 +3,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
+import QtQuick.Layouts
 
 
 Item {
@@ -13,18 +14,15 @@ Item {
     implicitHeight: 32
 
     // === СОСТОЯНИЕ ===
-    // Управляет тем, раскрыт островок или нет.
-    // Снаружи к нему можно обратиться как clock.isExpanded
-    property bool isExpanded: false
+    property string mode: "clock"
 
     // === ИСТОЧНИК ВРЕМЕНИ ===
-    // SystemClock — встроенный компонент Quickshell.
-    // Он сам обновляется с нужной точностью.
     SystemClock {
         id: systemClock
         precision: SystemClock.Minutes
     }
 
+    // === Источник уровня громкости ===
     PwObjectTracker {
         objects: [Pipewire.defaultAudioSink]
     }
@@ -32,17 +30,18 @@ Item {
     Connections {
         target: Pipewire.defaultAudioSink?.audio ?? null
         function onVolumeChanged() {
-            clockIsland.isExpanded = true;
+            clockIsland.mode = "volume";
             autoCollapseTimer.restart();
         }
     }
 
+    // === Таймер сброса состояния ===
     Timer {
         id: autoCollapseTimer
         interval: 2500
         repeat: false
         onTriggered: {
-            clockIsland.isExpanded = false;
+            clockIsland.mode = "clock";
         }
     }
 
@@ -50,13 +49,12 @@ Item {
     Rectangle {
         id: island
 
-        // Центрируем по горизонтали, прижимаем к верху.
         anchors.horizontalCenter: parent.horizontalCenter
-        // anchors.top: parent.top
+
 
         // Размеры зависят от состояния.
-        width: clockIsland.isExpanded ? 288 : 96
-        height: clockIsland.isExpanded ? 32 : 32
+        width: clockIsland.mode === "clock" ? 96 : 240
+        height: 32
 
         radius: height / 3
         color: "#000000"
@@ -69,27 +67,12 @@ Item {
             }
         }
 
-        // Плавная анимация высоты.
-        Behavior on height {
-            NumberAnimation {
-                duration: 250
-                easing.type: Easing.OutCubic
-            }
-        }
-
         // === ЧАСЫ ===
         Text {
             id: timeText
-
-            // В свернутом состоянии — по центру.
-            // В раскрытом — сдвигаем влево, чтобы освободить место для иконок.
-            anchors.left: parent.left
+            visible: clockIsland.mode === "clock"
             anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: clockIsland.isExpanded ? 20 : 0
-
-            // Ширина: в свернутом состоянии занимает всю таблетку (для центрирования),
-            // в раскрытом — фиксированная (70px).
-            width: clockIsland.isExpanded ? 70 : parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
 
             horizontalAlignment: Text.AlignHCenter
 
@@ -99,36 +82,20 @@ Item {
 
             color: "white"
             font.pixelSize: 16
-
-            // Анимация ширины (чтобы текст плавно смещался).
-            Behavior on width {
-                NumberAnimation {
-                    duration: 250
-                    easing.type: Easing.OutCubic
-                }
-            }
-
-            // Анимация отступа слева.
-            Behavior on anchors.leftMargin {
-                NumberAnimation {
-                    duration: 250
-                    easing.type: Easing.OutCubic
-                }
-            }
         }
 
-        // === СТРОКА С ИКОНКАМИ (Wi-Fi, Звук, Батарея) ===
-        Row {
-            id: statusRow
-
+        // === СТРОКА Звук ===
+        RowLayout {
+            id: volumeContent
+            visible: clockIsland.mode === "volume"
+            anchors.left: parent.left
             anchors.right: parent.right
+            anchors.leftMargin: 20
             anchors.rightMargin: 20
             anchors.verticalCenter: parent.verticalCenter
 
-            spacing: 18
-
             // Видимость зависит от состояния.
-            opacity: clockIsland.isExpanded ? 1 : 0
+            opacity: visible ? 1 : 0
 
             Behavior on opacity {
                 NumberAnimation {
@@ -136,25 +103,17 @@ Item {
                 }
             }
 
-            // Иконки. Пока это просто символы шрифта Nerd Fonts.
-            // Позже мы заменим их на реальные данные.
             Text {
-                text: "󰤨"  // Wi-Fi
+                text: "󰕾"
                 color: "white"
-                font.pixelSize: 18
+                font.pixelSize: 16
+                Layout.alignment: Qt.AlignVCenter
             }
-
-            // Text {
-            //     text: "󰕾"  // Громкость
-            //     color: "white"
-            //     font.pixelSize: 18
-            // }
 
             Item {
                 id: volumeIndicator
-                width: 60
-                height: 6
-                anchors.verticalCenter: parent.verticalCenter
+                Layout.fillWidth: true
+                Layout.preferredHeight: 6
 
                 // Фон полосы (серая подложка).
                 Rectangle {
@@ -180,12 +139,6 @@ Item {
                     }
                 }
             }
-
-            Text {
-                text: "󰁹"  // Батарея
-                color: "white"
-                font.pixelSize: 18
-            }
         }
 
         // === ОБРАБОТКА КЛИКА ===
@@ -193,8 +146,8 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: {
-                clockIsland.isExpanded = !clockIsland.isExpanded;
-                if (clockIsland.isExpanded) {
+                clockIsland.mode = clockIsland.mode === "clock" ? "volume" : "clock";
+                if (clockIsland.mode !== "clock") {
                     autoCollapseTimer.restart();
                 }
             }

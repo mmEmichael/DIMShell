@@ -1,13 +1,13 @@
-// shell.qml
-
 import QtQuick
 import Quickshell
 
 ShellRoot {
-    id: bar
+    id: root
+
+    property bool appMenuOpen: false
 
     PanelWindow {
-        id: mainWindow
+        id: bar
 
         anchors {
             top: true
@@ -16,6 +16,19 @@ ShellRoot {
         }
 
         implicitHeight: 34
+
         color: "transparent"
+
+        Pill {
+            id: pill
+            anchors.centerIn: parent
+
+            Clock {
+                visible: pill.menuMode
+            }
+            Battery {
+                visible: !pill.menuMode
+            }
+        }
     }
 }

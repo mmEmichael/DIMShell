@@ -2,12 +2,10 @@
 
 import QtQuick
 import Quickshell
-import Quickshell.Wayland
-
-// Подключаем папку с компонентами.
-import "components"
 
 ShellRoot {
+    id: bar
+
     PanelWindow {
         id: mainWindow
 
@@ -17,21 +15,7 @@ ShellRoot {
             right: true
         }
 
-        margins {
-            top: 4
-        }
-
-        // Высота окна. Должна быть больше высоты островка,
-        // чтобы был запас для анимации.
-        implicitHeight: 32
-
+        implicitHeight: 34
         color: "transparent"
-
-        // Наш компонент.
-        ClockIsland {
-            id: clock
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-        }
     }
 }

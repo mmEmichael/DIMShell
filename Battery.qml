@@ -1,7 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
-import Quickshell.Services.UPower
 
 Item {
     id: batteryWidget
@@ -10,10 +8,9 @@ Item {
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
 
-    readonly property var battery: UPower.displayDevice
-    property int percentage: battery.percentage ? Math.round(battery.percentage * 100) : 0
-    property bool isCharging: battery.state === UPowerDeviceState.Charging
-    property bool isFull: battery.state === UPowerDeviceState.FullyCharged
+    property int percentage: 50
+    property bool isCharging: false
+    property bool isFull: false
     property bool expanded: false
 
     function getBatteryEmoji(percent, charging, full) {
@@ -30,7 +27,6 @@ Item {
 
     RowLayout {
         id: row
-        anchors.fill: parent
         spacing: percentText.opacity > 0 ? 4 : 0
 
         Behavior on spacing {
@@ -74,7 +70,10 @@ Item {
         }
     }
 
-    TapHandler {
-        onTapped: batteryWidget.expanded = !batteryWidget.expanded
+    // TapHandler {
+    //     onTapped: batteryWidget.expanded = !batteryWidget.expanded
+    // }
+    HoverHandler {
+        onHoveredChanged: batteryWidget.expanded = !batteryWidget.expanded
     }
 }

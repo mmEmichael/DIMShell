@@ -15,7 +15,7 @@ Rectangle {
 
     color: "black"
 
-    property bool menuMode: false
+    property string mode: "Clock"
 
     default property alias content: layout.data
 
@@ -30,9 +30,20 @@ Rectangle {
         acceptedButtons: Qt.RightButton
 
         onTapped: {
-            menuMode = !menuMode;
+            if (pill.mode === "ControllCenter") {
+                pill.mode = "Clock";
+            } else if (pill.mode === "Clock") {
+                pill.mode = "ControllCenter";
+            }
         }
     }
+    // HoverHandler {
+    //     // acceptedButtons: Qt.RightButton
+
+    //     onHoveredChanged: {
+    //         pill.menuMode = !pill.menuMode;
+    //     }
+    // }
 
     Behavior on width {
         NumberAnimation {

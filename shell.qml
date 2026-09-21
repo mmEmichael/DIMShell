@@ -1,33 +1,105 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 
 ShellRoot {
     id: root
 
-    property bool appMenuOpen: false
+    property var laptopScreen: null
+    property var barScreen: null
 
-    PanelWindow {
-        id: bar
+    function updateScreen() {
+        let laptop = null;
 
-        anchors {
-            top: true
-            left: true
-            right: true
+        for (const screen of Quickshell.screens) {
+            if (screen.name === "eDP-1") {
+                laptop = screen;
+                break;
+            }
         }
 
-        implicitHeight: 34
+        laptopScreen = laptop;
 
-        color: "transparent"
+        let newScreen = null;
 
-        Pill {
-            id: pill
-            anchors.centerIn: parent
+        if (laptop !== null) {
+            newScreen = laptop;
+        } else if (Quickshell.screens.length > 0) {
+            newScreen = Quickshell.screens[0];
+        }
 
-            Clock {
-                visible: pill.menuMode
+        if (barScreen === newScreen)
+            return;
+
+        barLoader.active = false;
+
+        barScreen = newScreen;
+
+        barLoader.active = barScreen !== null;
+    }
+
+    Component.onCompleted: updateScreen()
+
+    Connections {
+        target: Quickshell
+
+        function onScreensChanged() {
+            root.updateScreen();
+        }
+    }
+
+    Loader {
+        id: barLoader
+
+        active: root.barScreen !== null
+
+        sourceComponent: PanelWindow { // qmllint disable uncreatable-type
+            id: bar
+
+            screen: root.barScreen
+
+            anchors {
+                top: true
+                left: true
+                right: true
             }
-            Battery {
-                visible: !pill.menuMode
+
+            implicitHeight: 35
+            exclusiveZone: 16
+
+            color: "transparent"
+
+            BatteryPuller {
+                id: batPuller
+            }
+
+            VolumePuller {
+                id: globalVolume
+            }
+
+            Pill {
+                id: pill
+                anchors.centerIn: parent
+
+                Clock {
+                    visible: pill.mode === "Clock"
+                }
+
+                Battery {
+                    visible: pill.mode === "ControllCenter" || pill.mode === "Battery" || batPuller.isLow
+
+                    isCharging: batPuller.isCharging
+                    percentage: batPuller.percentage
+                }
+
+                Volume {
+                    visible: pill.mode === "ControllCenter" || pill.mode === "Volume"
+
+                    volume: globalVolume.volume
+
+                    onVolumeChangedByUi: val => globalVolume.setVolume(val)
+                }
             }
         }
     }

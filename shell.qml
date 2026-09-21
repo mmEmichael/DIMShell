@@ -76,6 +76,12 @@ ShellRoot {
 
             VolumePuller {
                 id: globalVolume
+
+                onVolumeChangedExternally: {
+                    pill.mode = "Volume";
+                    volumeWidget.expanded = true;
+                    pill.restartResetTimer();
+                }
             }
 
             Pill {
@@ -86,19 +92,20 @@ ShellRoot {
                     visible: pill.mode === "Clock"
                 }
 
-                Battery {
-                    visible: pill.mode === "ControllCenter" || pill.mode === "Battery" || batPuller.isLow
-
-                    isCharging: batPuller.isCharging
-                    percentage: batPuller.percentage
-                }
-
                 Volume {
+                    id: volumeWidget
                     visible: pill.mode === "ControllCenter" || pill.mode === "Volume"
 
                     volume: globalVolume.volume
 
                     onVolumeChangedByUi: val => globalVolume.setVolume(val)
+                }
+
+                Battery {
+                    visible: pill.mode === "ControllCenter" || pill.mode === "Battery" || batPuller.isLow
+
+                    isCharging: batPuller.isCharging
+                    percentage: batPuller.percentage
                 }
             }
         }

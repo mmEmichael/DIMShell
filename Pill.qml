@@ -19,6 +19,21 @@ Rectangle {
 
     default property alias content: layout.data
 
+    Timer {
+        id: resetTimer
+
+        interval: 3000
+        repeat: false
+
+        onTriggered: {
+            pill.mode = "Clock";
+        }
+    }
+
+    function restartResetTimer() {
+        resetTimer.restart();
+    }
+
     RowLayout {
         id: layout
 
@@ -37,13 +52,15 @@ Rectangle {
             }
         }
     }
-    // HoverHandler {
-    //     // acceptedButtons: Qt.RightButton
 
-    //     onHoveredChanged: {
-    //         pill.menuMode = !pill.menuMode;
-    //     }
-    // }
+    HoverHandler {
+        id: hoverHandler
+        onHoveredChanged: {
+            if (!hovered) {
+                resetTimer.restart();
+            }
+        }
+    }
 
     Behavior on width {
         NumberAnimation {

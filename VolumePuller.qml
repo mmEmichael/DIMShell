@@ -1,60 +1,75 @@
 import QtQuick
-import Quickshell
-import Quickshell.Io
+import Quickshell.Services.Pipewire
 
 Item {
     id: puller
 
-    // Глобальное свойство громкости (0-100)
-    property int volume: 50
-    // Флаг отключенного звука (Mute)
+    property int volume: 0
     property bool isMuted: false
 
-    // Функция, которую мы будем вызывать из виджета для установки громкости
-    function setVolume(newValue) {
-        let volumeValue = newValue / 100;
-        Quickshell.execDetached({
-            command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", volumeValue.toFixed(2)]
-        });
-        // Сразу обновляем локальное значение, чтобы интерфейс не дергался в ожидании таймера
-        puller.volume = newValue;
+    // true только когда изменение пришло извне UI
+    signal volumeChangedExternally(int volume)
+    signal muteChangedExternally(bool muted)
+
+    readonly property var sink: Pipewire.defaultAudioSink
+
+    PwObjectTracker {
+        objects: [puller.sink]
     }
 
-    Process {
-        id: volumeGetProc
-        // Команда возвращает строку вида "Volume: 0.50" или "Volume: 0.50 [MUTED]"
-        command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
+    function setVolume(value) {
+        if (!sink || !sink.audio)
+            return;
+        sink.audio.volume = value / 100;
+    }
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let output = text.trim();
-                if (!output)
-                    return;
+    function setMuted(muted) {
+        if (!sink || !sink.audio)
+            return;
+        sink.audio.muted = muted;
+    }
 
-                // Проверяем статус Mute
-                puller.isMuted = output.includes("[MUTED]");
+    Connections {
+        target: puller.sink?.audio ?? null
 
-                // Извлекаем числовое значение громкости
-                let match = output.match(/Volume:\s+([0-9.]+)/);
-                if (match && match[1]) {
-                    let volFloat = parseFloat(match[1]);
-                    let volInt = Math.round(volFloat * 100);
+        function onVolumeChanged() {
+            if (!puller.sink?.audio)
+                return;
+            const newVolume = Math.round(puller.sink.audio.volume * 100);
 
-                    // Обновляем свойство, только если оно реально изменилось извне
-                    if (volInt !== puller.volume) {
-                        puller.volume = volInt;
-                    }
-                }
-            }
+            if (newVolume === puller.volume)
+                return;
+            puller.volume = newVolume;
+            puller.volumeChangedExternally(newVolume);
+        }
+
+        function onMutedChanged() {
+            if (!puller.sink?.audio)
+                return;
+            const newMuted = puller.sink.audio.muted;
+
+            if (newMuted === puller.isMuted)
+                return;
+            puller.isMuted = newMuted;
+            puller.muteChangedExternally(newMuted);
         }
     }
 
-    Timer {
-        id: timer
-        interval: 1000 // Опрашиваем систему раз в секунду
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: volumeGetProc.running = true
+    Connections {
+        target: Pipewire
+
+        function onDefaultAudioSinkChanged() {
+            if (!puller.sink?.audio)
+                return;
+            puller.volume = Math.round(puller.sink.audio.volume * 100);
+            puller.isMuted = puller.sink.audio.muted;
+        }
+    }
+
+    Component.onCompleted: {
+        if (sink?.audio) {
+            volume = Math.round(sink.audio.volume * 100);
+            isMuted = sink.audio.muted;
+        }
     }
 }

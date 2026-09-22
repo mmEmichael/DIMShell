@@ -3,6 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 
+import "widgets"
+
 ShellRoot {
     id: root
 
@@ -54,7 +56,7 @@ ShellRoot {
 
         active: root.barScreen !== null
 
-        sourceComponent: PanelWindow { // qmllint disable uncreatable-type
+        sourceComponent: PanelWindow {
             id: bar
 
             screen: root.barScreen
@@ -66,9 +68,11 @@ ShellRoot {
             }
 
             implicitHeight: 35
-            exclusiveZone: 16
+            exclusiveZone: 18
 
             color: "transparent"
+
+            focusable: true
 
             BatteryPuller {
                 id: batPuller
@@ -101,7 +105,7 @@ ShellRoot {
                     onVolumeChangedByUi: val => globalVolume.setVolume(val)
                 }
 
-                Battery {
+                BatteryWidget {
                     visible: pill.mode === "ControllCenter" || pill.mode === "Battery" || batPuller.isLow
 
                     isCharging: batPuller.isCharging

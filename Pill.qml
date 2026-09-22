@@ -6,7 +6,8 @@ Rectangle {
     id: pill
 
     implicitWidth: layout.implicitWidth + 16
-    implicitHeight: layout.implicitHeight + 8
+    // implicitHeight: layout.implicitHeight + 8
+    implicitHeight: 32
 
     width: implicitWidth
     height: implicitHeight

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 
 import "widgets"
+import "components"
 
 ShellRoot {
     id: root
@@ -82,9 +83,11 @@ ShellRoot {
                 id: globalVolume
 
                 onVolumeChangedExternally: {
-                    pill.mode = "Volume";
-                    volumeWidget.expanded = true;
-                    pill.restartResetTimer();
+                    if (pill.mode !== "ControllCenter") {
+                        pill.mode = "Volume";
+                        volumeWidget.expanded = true;
+                        pill.restartResetTimer();
+                    }
                 }
             }
 

@@ -5,6 +5,7 @@ import Quickshell
 
 import "widgets"
 import "components"
+import "services"
 
 ShellRoot {
     id: root
@@ -75,11 +76,11 @@ ShellRoot {
 
             focusable: true
 
-            BatteryPuller {
-                id: batPuller
+            BatteryService {
+                id: batService
             }
 
-            VolumePuller {
+            VolumeService {
                 id: globalVolume
 
                 onVolumeChangedExternally: {
@@ -90,6 +91,10 @@ ShellRoot {
                     }
                 }
             }
+
+            // WifiService {
+            //     id: wifiPuller
+            // }
 
             Pill {
                 id: pill
@@ -109,19 +114,22 @@ ShellRoot {
                 }
 
                 BatteryWidget {
-                    visible: pill.mode === "ControllCenter" || pill.mode === "Battery" || batPuller.isLow
+                    visible: pill.mode === "ControllCenter" || pill.mode === "Battery" || batService.isLow
 
-                    isCharging: batPuller.isCharging
-                    percentage: batPuller.percentage
+                    isCharging: batService.isCharging
+                    percentage: batService.percentage
                 }
-                ScrollableListWidget {
-                    visible: pill.mode === "ControllCenter"
-                    emoji: "🎵"
-                    model: ["Rock", "Jazz", "Pop", "Classical", "Hip-Hop"]
-                    wheelSensitivity: 3
-                    onItemSelected: i => console.log("selected", i)
-                    onCurrentIndexChangedByUi: i => console.log("scrolled", i)
-                }
+
+                // WifiWidget {
+                //     visible: pill.mode === "ControllCenter"
+                //     wifiEnabled: wifiPuller.wifiEnabled
+                //     ssid: wifiPuller.ssid
+                //     signal: wifiPuller.signal
+                //     isConnected: wifiPuller.isConnected
+                //     networks: wifiPuller.networks
+
+                //     onNetworkSelected: name => wifiPuller.connectTo(name)
+                // }
             }
         }
     }

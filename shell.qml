@@ -114,6 +114,14 @@ ShellRoot {
                     isCharging: batPuller.isCharging
                     percentage: batPuller.percentage
                 }
+                ScrollableListWidget {
+                    visible: pill.mode === "ControllCenter"
+                    emoji: "🎵"
+                    model: ["Rock", "Jazz", "Pop", "Classical", "Hip-Hop"]
+                    wheelSensitivity: 3
+                    onItemSelected: i => console.log("selected", i)
+                    onCurrentIndexChangedByUi: i => console.log("scrolled", i)
+                }
             }
         }
     }

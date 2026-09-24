@@ -16,7 +16,7 @@ Rectangle {
 
     color: "black"
 
-    property string mode: "Clock"
+    property string mode: ""
 
     default property alias content: layout.data
 
@@ -27,7 +27,7 @@ Rectangle {
         repeat: false
 
         onTriggered: {
-            pill.mode = "Clock";
+            pill.mode = "clock";
         }
     }
 
@@ -40,18 +40,6 @@ Rectangle {
 
         anchors.centerIn: parent
         spacing: 10
-    }
-
-    TapHandler {
-        acceptedButtons: Qt.RightButton
-
-        onTapped: {
-            if (pill.mode === "ControllCenter") {
-                pill.mode = "Clock";
-            } else if (pill.mode === "Clock") {
-                pill.mode = "ControllCenter";
-            }
-        }
     }
 
     HoverHandler {

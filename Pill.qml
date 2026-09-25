@@ -8,9 +8,6 @@ Item {
 
     anchors.horizontalCenter: parent.horizontalCenter
 
-    implicitHeight: 30
-    implicitWidth: 90
-
     default property alias content: row.data
 
     Rectangle {
@@ -22,9 +19,9 @@ Item {
         }
         color: "black"
 
-        implicitHeight: row.implicitHeight + 10
+        implicitHeight: row.implicitHeight + 5
         implicitWidth: row.implicitWidth + 10
-        radius: 10
+        radius: 8
 
         RowLayout {
             id: row

@@ -18,7 +18,7 @@ ShellRoot {
 
         implicitHeight: 120
         implicitWidth: 270
-        exclusiveZone: 16 // высота таблетки 32 + отступ сверху 2 + отступ снизу 2 - niri gap 20
+        exclusiveZone: 0
 
         mask: Region {
             item: pill // Маска автоматически примет форму и раз меры этого элемента

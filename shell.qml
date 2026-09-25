@@ -1,8 +1,8 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 
-// import "widgets"
+import "widgets"
+
 // import "components"
 // import "services"
 
@@ -21,13 +21,16 @@ ShellRoot {
         exclusiveZone: 16 // высота таблетки 32 + отступ сверху 2 + отступ снизу 2 - niri gap 20
 
         mask: Region {
-            item: pill // Маска автоматически примет форму и размеры этого элемента
+            item: pill // Маска автоматически примет форму и раз меры этого элемента
         }
 
         color: "transparent"
 
         Pill {
             id: pill
+            ClockWidget {
+                visible: !pill.controllMode
+            }
         }
     }
 }

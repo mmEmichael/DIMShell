@@ -1,67 +1,55 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 
-Rectangle {
-    id: pill
+Item {
+    id: root
 
-    implicitWidth: layout.implicitWidth + 16
-    // implicitHeight: layout.implicitHeight + 8
-    implicitHeight: 32
+    property bool controllMode: false
 
-    width: implicitWidth
-    height: implicitHeight
+    anchors.horizontalCenter: parent.horizontalCenter
 
-    radius: height / 3
+    implicitHeight: 30
+    implicitWidth: 90
 
-    color: "black"
+    default property alias content: row.data
 
-    property string mode: ""
-
-    default property alias content: layout.data
-
-    Timer {
-        id: resetTimer
-
-        interval: 3000
-        repeat: false
-
-        onTriggered: {
-            pill.mode = "clock";
+    Rectangle {
+        id: rectangle
+        anchors.margins: 2
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors {
+            top: parent.top
         }
-    }
+        color: "black"
 
-    function restartResetTimer() {
-        resetTimer.restart();
-    }
+        implicitHeight: row.implicitHeight + 10
+        implicitWidth: row.implicitWidth + 10
+        radius: 10
 
-    RowLayout {
-        id: layout
+        RowLayout {
+            id: row
+            anchors.centerIn: rectangle
+            spacing: 4
+        }
 
-        anchors.centerIn: parent
-        spacing: 10
-    }
-
-    HoverHandler {
-        id: hoverHandler
-        onHoveredChanged: {
-            if (!hovered) {
-                resetTimer.restart();
+        TapHandler {
+            acceptedButtons: Qt.RightButton
+            onTapped: {
+                root.controllMode = !root.controllMode;
             }
         }
-    }
 
-    Behavior on width {
-        NumberAnimation {
-            duration: 250
-            easing.type: Easing.OutCubic
+        Behavior on implicitHeight {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.InOutCubic
+            }
         }
-    }
-
-    Behavior on height {
-        NumberAnimation {
-            duration: 250
-            easing.type: Easing.OutCubic
+        Behavior on implicitWidth {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.InOutCubic
+            }
         }
     }
 }

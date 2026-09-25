@@ -15,6 +15,9 @@ ShellRoot {
     function move(id) {
         const name = root.outputs[id];
 
+        if (panel.screen?.name === name)
+            return;
+
         for (const screen of Quickshell.screens) {
             if (screen.name === name) {
                 animation.screen = screen;

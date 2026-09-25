@@ -8,6 +8,9 @@ Item {
 
     anchors.horizontalCenter: parent.horizontalCenter
 
+    implicitHeight: rectangle.implicitHeight + 5
+    implicitWidth: rectangle.implicitWidth + 10
+
     default property alias content: row.data
 
     Rectangle {

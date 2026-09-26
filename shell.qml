@@ -12,6 +12,9 @@ ShellRoot {
 
     property var outputs: ({})
 
+    // ИЗМЕНЕНИЕ: если workspace всё ещё на том же мониторе,
+    // ничего не делаем. Поэтому переключение рабочих столов
+    // на одном мониторе не запускает анимацию.
     function move(id) {
         const name = root.outputs[id];
 
@@ -27,6 +30,7 @@ ShellRoot {
         }
     }
 
+    // Анимация: исчезновение → перенос → появление
     SequentialAnimation {
         id: animation
 
@@ -61,11 +65,20 @@ ShellRoot {
             onRead: data => {
                 const e = JSON.parse(data);
 
+                // ИЗМЕНЕНИЕ:
+                // WorkspacesChanged теперь также используется
+                // для восстановления панели после подключения/
+                // отключения монитора.
                 if (e.WorkspacesChanged) {
-                    for (const ws of e.WorkspacesChanged.workspaces)
+                    for (const ws of e.WorkspacesChanged.workspaces) {
                         root.outputs[ws.id] = ws.output;
+
+                        if (ws.is_focused)
+                            root.move(ws.id);
+                    }
                 }
 
+                // Переключение фокуса между workspace.
                 if (e.WorkspaceActivated?.focused)
                     root.move(e.WorkspaceActivated.id);
             }
@@ -75,6 +88,7 @@ ShellRoot {
     // qmllint disable uncreatable-type
     PanelWindow {
         id: panel
+
         anchors {
             top: true
         }
@@ -84,15 +98,19 @@ ShellRoot {
         exclusiveZone: 0
 
         mask: Region {
-            item: pill // Маска автоматически примет форму и раз меры этого элемента
+            item: pill
         }
 
         color: "transparent"
 
         Pill {
             id: pill
+
             ClockWidget {
                 visible: !pill.controllMode
+            }
+            BatteryWidget {
+                visible: pill.controllMode || percentage <= 10
             }
         }
     }
